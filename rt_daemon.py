@@ -36,8 +36,10 @@ def rt_ctrl_server_main(sock_addr):
                     conn_sock.send(bytes(rt_dir, encoding='utf-8'))
                     rlist.add(conn_sock)
                     print('[DEBUG] RT_CONNECT: num_clients =', len(rlist) - 1)
+                # Conn socket -> Disconnect the client
                 else:
                     rlist.remove(sock)
+                    sock.close()
                     print('[DEBUG] RT_DISCONNECT: num_clients = ',
                           len(rlist) - 1)
                     # Once refcnt reaches one (listenfd), terminate
