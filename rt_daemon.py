@@ -45,6 +45,7 @@ def rt_ctrl_server_main(sock_addr):
                     # Once refcnt reaches one (listenfd), terminate
                     if len(rlist) <= 1:
                         print('[DEBUG] RT_GOODBYE')
+                        os.unlink(sock_addr)
                         return
 
 
