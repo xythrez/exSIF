@@ -1,0 +1,32 @@
+#!/bin/bash
+
+set -e
+
+SCRIPT_PATH="src/bootstrapper.sh"
+DAEMON_PATH="src/daemon.py"
+RUNTIME_PATH="/bin/apptainer"  # TODO: Statically compile this
+IMAGE_PATH="$1"
+OUTPUT_PATH="$2"
+
+if [ -z "$IMAGE_PATH" ]; then
+	printf "Usage: %s [img] [out]\n" "$0"
+	exit 1
+fi
+
+if [ -z "$OUTPUT_PATH" ]; then
+	OUTPUT_PATH="$IMAGE_PATH.exsif"
+fi
+
+SCRIPT_LEN=$(wc -l "$SCRIPT_PATH" | awk '{print $1}' )
+DAEMON_LEN=$(wc -l "$DAEMON_PATH" | awk '{print $1}' )
+RUNTIME_LEN=$(($(wc -l "$RUNTIME_PATH" | awk '{print $1}') + 1))
+IMAGE_CHKSUM=$(sha256sum "$IMAGE_PATH" | awk '{print $1}')
+
+sed "s/@@SCRIPT_LEN@@/$SCRIPT_LEN/" "$SCRIPT_PATH" \
+	| sed "s/@@DAEMON_LEN@@/$DAEMON_LEN/" \
+	| sed "s/@@RUNTIME_LEN@@/$RUNTIME_LEN/" \
+	| sed "s/@@IMAGE_CHECKSUM@@/$IMAGE_CHKSUM/" > "$OUTPUT_PATH"
+cat "$DAEMON_PATH" "$RUNTIME_PATH" >> "$OUTPUT_PATH"
+printf "\n" >> "$OUTPUT_PATH"
+cat "$IMAGE_PATH" >> "$OUTPUT_PATH"
+chmod +x "$OUTPUT_PATH"

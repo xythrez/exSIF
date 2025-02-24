@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-
+import stat
 import sys
 import os
 import signal
@@ -8,6 +8,29 @@ import socket
 import time
 import select
 import tempfile
+import subprocess
+
+SCRIPT_LEN = int(sys.argv[2])
+RUNTIME_LEN = int(sys.argv[3])
+IMAGE_CHKSUM = sys.argv[4]
+
+
+def unwrap_runtime(dst):
+    self = sys.argv[1]
+    ln_start = SCRIPT_LEN + 1
+    ln_end = SCRIPT_LEN + RUNTIME_LEN
+    os.system(f'sed -n \'{ln_start},{ln_end}p;{ln_end}q\' '
+              f'\'{self}\' > \'{dst}\'')
+    os.chmod(dst, stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
+
+
+def unwrap_image(dst):
+    if os.path.exists(dst):
+        return
+    # TODO: container checksum
+    self = sys.argv[1]
+    ln_exclude = SCRIPT_LEN + RUNTIME_LEN
+    os.system(f'sed \'1,{ln_exclude}d\' \'{self}\' > \'{dst}\'')
 
 
 def get_ctrl_sock_addr():
@@ -25,7 +48,8 @@ def rt_ctrl_server_main(sock_addr):
           tempfile.TemporaryDirectory(prefix='exsif-') as rt_dir):
         ctrl_sock.bind(sock_addr)
         ctrl_sock.listen()
-        # TODO: Unwrap the RT, or symlink system RT to tempdir
+        # TODO: symlink system RT to tempdir if it exists
+        unwrap_runtime(os.path.join(rt_dir, 'runtime'))
         rlist = {ctrl_sock}
         while True:
             rready, _, _ = select.select(rlist, [], [])
@@ -54,11 +78,11 @@ def rt_client_main(sock_addr):
         client_sock.connect(sock_addr)
         # The fixed 256 byte len is probably fine here, since shm.h has it as well
         rt_path = client_sock.recv(256).decode(encoding='utf-8')
-        # TODO: check and extract container, then spawn subprocess using rt_path and container
-        print(rt_path)
-        while True:
-            time.sleep(1)
-
+        rt_bin = os.path.join(rt_path, 'runtime')
+        rt_img = os.path.join(rt_path, IMAGE_CHKSUM)
+        unwrap_image(os.path.join(rt_img))
+        ret = os.system(f'"{rt_bin}" run {rt_img}')
+        sys.exit(ret)
 
 
 def main():
@@ -93,3 +117,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+sys.exit(0)
