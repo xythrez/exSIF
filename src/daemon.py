@@ -81,7 +81,8 @@ def rt_client_main(sock_addr):
         rt_bin = os.path.join(rt_path, 'runtime')
         rt_img = os.path.join(rt_path, IMAGE_CHKSUM)
         unwrap_image(os.path.join(rt_img))
-        ret = os.system(f'"{rt_bin}" run {rt_img}')
+        args = ' '.join([f'"{x}"' for x in sys.argv[5:]])
+        ret = os.system(f'"{rt_bin}" run "{rt_img}" {args}')
         sys.exit(ret)
 
 

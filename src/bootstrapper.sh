@@ -8,5 +8,5 @@ DAEMON_START="$((${SCRIPT_LEN} + 1))"
 DAEMON_END="$((${SCRIPT_LEN} + ${DAEMON_LEN}))"
 exec python3 \
 	-c "$(sed -n "${DAEMON_START},${DAEMON_END}p;${DAEMON_END}q" "$0")" \
-	"$0" "$(($DAEMON_LEN + $SCRIPT_LEN))" "$RUNTIME_LEN" "$IMAGE_CHECKSUM"
+	"$0" "$(($DAEMON_LEN + $SCRIPT_LEN))" "$RUNTIME_LEN" "$IMAGE_CHECKSUM" "$@"
 exit 0
