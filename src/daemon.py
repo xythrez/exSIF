@@ -21,7 +21,7 @@ def unwrap_runtime(dst):
     ln_end = SCRIPT_LEN + RUNTIME_LEN
     os.system(f'sed -n \'{ln_start},{ln_end}p;{ln_end}q\' '
               f'\'{self}\' > \'{dst}\'')
-    os.chmod(dst, stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
+    os.chmod(dst, stat.S_IRWXU | stat.S_IXGRP | stat.S_IXOTH)
 
 
 def unwrap_image(dst):
