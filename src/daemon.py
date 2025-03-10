@@ -48,8 +48,16 @@ def rt_ctrl_server_main(sock_addr):
           tempfile.TemporaryDirectory(prefix='exsif-') as rt_dir):
         ctrl_sock.bind(sock_addr)
         ctrl_sock.listen()
-        # TODO: symlink system RT to tempdir if it exists
-        unwrap_runtime(os.path.join(rt_dir, 'runtime'))
+
+        # DONE: symlink system RT to tempdir if it exists
+        system_rt_path = '/bin/runtime'
+        temp_rt_path = os.path.join(rt_dir, 'runtime')
+        if os.path.exists(system_rt_path):
+            os.symlink(system_rt_path, temp_rt_path) # uses system runtime
+        else:
+            unwrap_runtime(temp_rt_path) # extract runtime
+
+        # unwrap_runtime(os.path.join(rt_dir, 'runtime'))
         rlist = {ctrl_sock}
         while True:
             rready, _, _ = select.select(rlist, [], [])
