@@ -58,7 +58,7 @@ def rt_ctrl_server_main(sock_addr):
         ctrl_sock.listen()
 
         # DONE: symlink system RT to tempdir if it exists
-        system_rt_path = '/bin/runtime'
+        system_rt_path = '/bin/apptainer'
         temp_rt_path = os.path.join(rt_dir, 'runtime')
         if os.path.exists(system_rt_path):
             os.symlink(system_rt_path, temp_rt_path) # uses system runtime
