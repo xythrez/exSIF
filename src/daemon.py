@@ -36,6 +36,24 @@ def unwrap_image(dst):
 def get_ctrl_sock_addr():
     return os.path.join('/', 'tmp', f'exsif-{os.getuid()}')
 
+def get_apptainer_path():
+    # Find the system-installed apptainer using /usr/bin/env
+    try:
+        result = subprocess.run(['which', 'apptainer'], capture_output=True, text=True, check=True)
+        return result.stdout.strip()
+    except subprocess.CalledProcessError:
+        return None
+
+def is_version_compatible(apptainer_path):
+    # check if system apptainer is compatible
+    try:
+        result = subprocess.run([apptainer_path, '--version'], capture_output=True, text=True, check=True)
+        version = result.stdout.strip()
+        return True
+        # actual version compatibility check
+        # return version == '0.0.1'
+    except subprocess.CalledProcessError:
+        return False
 
 def rt_ctrl_server_main(sock_addr):
     # Remove any lingering sockets
@@ -49,13 +67,23 @@ def rt_ctrl_server_main(sock_addr):
         ctrl_sock.bind(sock_addr)
         ctrl_sock.listen()
 
-        # DONE: symlink system RT to tempdir if it exists
-        system_rt_path = '/bin/apptainer'
         temp_rt_path = os.path.join(rt_dir, 'runtime')
-        if os.path.exists(system_rt_path):
-            os.symlink(system_rt_path, temp_rt_path) # uses system runtime
+
+        # DOUBLE CHECK: symlink system RT to tempdir if it exists
+        system_rt_path = get_apptainer_path()
+        if system_rt_path and is_version_compatible(system_rt_path):
+            print(f'[DEBUG] Using system apptainer at {system_rt_path}')
+            try:
+                os.symlink(system_rt_path, temp_rt_path)  # uses system runtime
+            except OSError as e:
+                print('[ERROR] Failed to symlink system apptainer:', e)
+                system_rt_path = None
         else:
-            unwrap_runtime(temp_rt_path) # extract runtime
+            print('[DEBUG] System apptainer not found or incompatible')
+            system_rt_path = None
+
+        if not system_rt_path:
+            unwrap_runtime(temp_rt_path)  # extract runtime
 
         # unwrap_runtime(os.path.join(rt_dir, 'runtime'))
         rlist = {ctrl_sock}
