@@ -1,0 +1,5 @@
+System,SIFImageSize,ExSIFImageSize,SIFLaunchTime,ExSIFFirstLaunchTime,ExSIFRepeatedLaunchTime
+Hadoop,1.1G,1.1G,0.87s,0.802s,0.104s
+Spark,506M,546M,0.082s,0.470s,0.102s
+Flink,551M,591M,0.569s,0.982s,0.585s
+Kafka,205M,245M,0.087s,0.278s,0.105s
