@@ -36,7 +36,7 @@ Building a Container
 are basing your container off of docker, you can also directly
 [pull from dockerhub](https://apptainer.org/docs/user/main/build_a_container.html).
 
-2. Run the script `./make_sif <input.sif> <output.exsif>`
+2. Run the script `./make_exsif <input.sif> <output.exsif>`
 
 Running a Container
 -------------------
