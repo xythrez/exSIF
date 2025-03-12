@@ -72,14 +72,14 @@ def rt_ctrl_server_main(sock_addr):
         # DOUBLE CHECK: symlink system RT to tempdir if it exists
         system_rt_path = get_apptainer_path()
         if system_rt_path and is_version_compatible(system_rt_path):
-            print(f'[DEBUG] Using system apptainer at {system_rt_path}')
+            # print(f'[DEBUG] Using system apptainer at {system_rt_path}')
             try:
                 os.symlink(system_rt_path, temp_rt_path)  # uses system runtime
             except OSError as e:
-                print('[ERROR] Failed to symlink system apptainer:', e)
+                # print('[ERROR] Failed to symlink system apptainer:', e)
                 system_rt_path = None
         else:
-            print('[DEBUG] System apptainer not found or incompatible')
+            # print('[DEBUG] System apptainer not found or incompatible')
             system_rt_path = None
 
         if not system_rt_path:
