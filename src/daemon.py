@@ -49,9 +49,12 @@ def is_version_compatible(apptainer_path):
     try:
         result = subprocess.run([apptainer_path, '--version'], capture_output=True, text=True, check=True)
         version = result.stdout.strip()
-        return True
+        print(f'[DEBUG] System apptainer version: {version}')
+        
         # actual version compatibility check
-        # return version == '0.0.1'
+        if version == 'apptainer version 1.3.4':
+            return True
+        
     except subprocess.CalledProcessError:
         return False
 
@@ -71,15 +74,16 @@ def rt_ctrl_server_main(sock_addr):
 
         # DOUBLE CHECK: symlink system RT to tempdir if it exists
         system_rt_path = get_apptainer_path()
+        print("[DEBUG] what's the system_rt_path", system_rt_path)
         if system_rt_path and is_version_compatible(system_rt_path):
-            # print(f'[DEBUG] Using system apptainer at {system_rt_path}')
+            print(f'[DEBUG] Using system apptainer at {system_rt_path}')
             try:
                 os.symlink(system_rt_path, temp_rt_path)  # uses system runtime
             except OSError as e:
-                # print('[ERROR] Failed to symlink system apptainer:', e)
+                print('[ERROR] Failed to symlink system apptainer:', e)
                 system_rt_path = None
         else:
-            # print('[DEBUG] System apptainer not found or incompatible')
+            print('[DEBUG] System apptainer not found or incompatible')
             system_rt_path = None
 
         if not system_rt_path:
