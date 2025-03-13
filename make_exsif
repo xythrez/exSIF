@@ -4,7 +4,15 @@ set -e
 
 SCRIPT_PATH="src/bootstrapper.sh"
 DAEMON_PATH="src/daemon.py"
-RUNTIME_PATH="/bin/apptainer"  # TODO: Statically compile this
+
+# might need to add apptainer to your path - #FIXME
+RUNTIME_PATH="$(command -v apptainer 2>/dev/null || echo "/bin/apptainer")"
+
+if [ ! -x "$RUNTIME_PATH" ]; then
+    echo "Error: apptainer not found in PATH or at /bin/apptainer." >&2
+    exit 1
+fi
+
 IMAGE_PATH="$1"
 OUTPUT_PATH="$2"
 

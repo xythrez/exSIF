@@ -10,6 +10,7 @@ import select
 import tempfile
 import subprocess
 import hashlib
+import re
 
 SCRIPT_LEN = int(sys.argv[2])
 RUNTIME_LEN = int(sys.argv[3])
@@ -47,7 +48,7 @@ def get_ctrl_sock_addr():
 def get_apptainer_path():
     # Find the system-installed apptainer using /usr/bin/env
     try:
-        result = subprocess.run(['which', 'apptainer'], capture_output=True, text=True, check=True)
+        result = subprocess.run(['command', '-v', 'apptainer'], capture_output=True, text=True, check=True)
         return result.stdout.strip()
     except subprocess.CalledProcessError:
         return None
@@ -60,7 +61,7 @@ def is_version_compatible(apptainer_path):
         print(f'[DEBUG] System apptainer version: {version}')
         
         # actual version compatibility check
-        if version == 'apptainer version 1.3.4':
+        if re.match(r'^apptainer version 1\.3\.\d+', version):
             return True
         
     except subprocess.CalledProcessError:
