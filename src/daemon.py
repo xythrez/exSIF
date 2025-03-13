@@ -9,10 +9,17 @@ import time
 import select
 import tempfile
 import subprocess
+import hashlib
 
 SCRIPT_LEN = int(sys.argv[2])
 RUNTIME_LEN = int(sys.argv[3])
 IMAGE_CHKSUM = sys.argv[4]
+
+def calculate_checksum(file_path):
+    hasher = hashlib.sha256()
+    with open(file_path, 'rb') as f:
+        hasher.update(f.read())
+    return hasher.hexdigest()
 
 
 def unwrap_runtime(dst):
@@ -25,13 +32,14 @@ def unwrap_runtime(dst):
 
 
 def unwrap_image(dst):
-    if os.path.exists(dst):
+    # Check if the path is exist and valid
+    if os.path.exists(dst) and calculate_checksum(dst) == IMAGE_CHKSUM:
         return
-    # TODO: container checksum
+
+    # If not, re-extract runtime
     self = sys.argv[1]
     ln_exclude = SCRIPT_LEN + RUNTIME_LEN
     os.system(f'sed \'1,{ln_exclude}d\' \'{self}\' > \'{dst}\'')
-
 
 def get_ctrl_sock_addr():
     return os.path.join('/', 'tmp', f'exsif-{os.getuid()}')
