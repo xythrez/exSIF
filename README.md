@@ -49,3 +49,6 @@ To run an exsif container
 
 This should start a local runtime and drop the user into the container session
 
+License
+-------------------
+This project is licensed under the [MIT License](./LICENSE).
